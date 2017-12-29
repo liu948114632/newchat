@@ -1,0 +1,74 @@
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>广播式WebSocket</title>
+    <script src="http://cdn.bootcss.com/sockjs-client/1.1.1/sockjs.min.js"></script>
+    <script src="http://cdn.bootcss.com/stomp.js/2.3.3/stomp.js"></script>
+    <script src="http://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body onload="disconnect()">
+<noscript><h2 style="color: #e80b0a;">Sorry，浏览器不支持WebSocket</h2></noscript>
+<div>
+    <div>
+        <button id="connect" onclick="connect();">连接</button>
+        <button id="disconnect" disabled="disabled" onclick="disconnect();">断开连接</button>
+    </div>
+
+    <div id="conversationDiv">
+        <label>输入你的名字</label><input type="text" id="name"/>
+        <button id="sendName" onclick="sendName();">发送</button>
+        <p id="response"></p>
+    </div>
+</div>
+<script type="text/javascript">
+    var stompClient = null;
+    function setConnected(connected) {
+        document.getElementById("connect").disabled = connected;
+        document.getElementById("disconnect").disabled = !connected;
+        document.getElementById("conversationDiv").style.visibility = connected ? 'visible' : 'hidden';
+//        $("#connect").disabled = connected;
+//        $("#disconnect").disabled = !connected;
+        $("#response").html();
+    }
+    function connect() {
+        var socket = new SockJS('/endPoint');
+        stompClient = Stomp.over(socket);
+        stompClient.connect({}, function (frame) {
+            setConnected(true);
+            console.log('Connected:' + frame);
+//            然后再通过调用stompClient中的subscribe方法来订阅/topic/getResponse发送来的消息，也就是我们在Controller中的方法上添加的@SendTo注解的参数
+
+            stompClient.subscribe('/topic/sendMessage', function (response) {
+//                showResponse(JSON.parse(response.body));
+                showResponse(response.body);
+            })
+        });
+    }
+    function disconnect() {
+        if (stompClient != null) {
+            stompClient.disconnect();
+        }
+        setConnected(false);
+        console.log('Disconnected');
+    }
+    function sendName() {
+        var name = $('#name').val();
+        console.log('name:' + name);
+//        stompClient中的send方法表示发送一条消息到服务器
+        stompClient.send("/getMessage", {}, name);
+//        stompClient.send("/getMessage", {}, JSON.stringify({'name': name}));
+    }
+    function showResponse(message) {
+        var old=$("#response").html();
+        var msg;
+        if(old==null||old==''){
+            msg=message;
+        }else {
+            msg=message+"<br></br>"+old;
+        }
+//       var msg= $("#response").html()+'<br></br>'+message;
+        $("#response").html(msg);
+    }
+</script>
+</body>
+</html>
