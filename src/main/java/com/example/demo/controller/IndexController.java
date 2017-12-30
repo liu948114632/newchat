@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.websocket.Session;
 import java.io.IOException;
 
 /**
@@ -32,8 +33,8 @@ public class IndexController {
     @ResponseBody
     public void  test() throws InterruptedException, IOException {
         for (int i=1;i<10;i++){
-            for(MySocket item:MySocket.webSocketSet){
-                item.session.getBasicRemote().sendText("第"+i+"次消息推送");
+            for(Session item:MySocket.webSocketSet){
+                item.getBasicRemote().sendText("第"+i+"次消息推送");
 //                item.session.getAsyncRemote().sendText("第"+i+"次消息推送");
             }
 //            Thread.sleep(100);

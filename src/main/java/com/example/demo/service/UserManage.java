@@ -1,12 +1,14 @@
 package com.example.demo.service;
 
+import com.example.demo.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import javax.annotation.PostConstruct;
+import java.util.*;
 
 /**
  * 招股金服
@@ -14,30 +16,31 @@ import java.util.Map;
  * Author : liuyuanbo
  * Date： 2017/12/29
  */
-@Service
+@Component
 public class UserManage {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    private Map<String,User> userMap = new HashMap();
+    private static Map<Integer,User> userMap = new HashMap<>();
 
-    public User getUserInfo(int userid) {
+    private Set<String> keyWord = new HashSet<>();
+    public  User getUserInfo(int userId) {
         try{
-            User user = userMap.get(userid+"");
+            User user = userMap.get(userId);
             Date nowDate = null;
             if(user != null ){
                 nowDate = user.getValidTime();
             }
             if(nowDate != null && (new Date().getTime() - nowDate.getTime())  < 5 * 60 * 1000){
-                return userMap.get(userid+"");
+                return userMap.get(userId);
             }else{
-                user = getUserDb(userid);
+                user = getUserDb(userId);
                 if(user == null){
                     return null;
                 }
                 user.setValidTime(new Date());
-                userMap.put(userid+"",user);
-                return userMap.get(userid+"");
+                userMap.put(userId,user);
+                return user;
             }
         }catch (Exception e){
             e.printStackTrace();
@@ -45,43 +48,40 @@ public class UserManage {
         return null;
     }
 
-    class User {
-        private int id;
-        private String name;
-        private Date validTime;
-
-        public int getId() {
-            return id;
-        }
-
-        public void setId(int id) {
-            this.id = id;
-        }
-
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public Date getValidTime() {
-            return validTime;
-        }
-
-        public void setValidTime(Date validTime) {
-            this.validTime = validTime;
-        }
-    }
-
-    private User getUserDb(int id){
-        Map map = jdbcTemplate.queryForMap("SELECT fNickName FROM fuser WHERE fid = "+id);
+    private  User getUserDb(int id){
+        Map map = jdbcTemplate.queryForMap("SELECT fNickName, floginName FROM fuser WHERE fid = "+id);
         if(map == null){
             return null;
         }
         User user = new User();
-        user.setName(map.get("fNickName").toString());
+        if(map.get("fNickName")!= null){
+            user.setName(map.get("fNickName").toString());
+        }else {
+            user.setName(map.get("floginName").toString());
+        }
         return user;
+    }
+
+    public  String checkKeyWord(String message){
+        String newMessage = message;
+        for (String s :keyWord){
+            if(message.contains(s)){
+                newMessage =  message.replace(s,"**");
+                break;
+            }
+        }
+        return newMessage;
+    }
+
+    @PostConstruct
+    @Scheduled(cron = "0 0/3 * * * ? ")
+    public void syncKenWord(){
+        Map map = jdbcTemplate.queryForMap("SELECT *  FROM fsystemargs s where s.`fKey` = 'keyWord'");
+        String value;
+        if(map != null && map.get("fValue")!= null){
+            value = map.get("fValue").toString();
+            String keys[] = value.split(",");
+            Collections.addAll(this.keyWord, keys);
+        }
     }
 }
