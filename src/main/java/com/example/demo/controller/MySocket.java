@@ -1,6 +1,5 @@
 package com.example.demo.controller;
 
-import com.example.demo.config.HttpConfig;
 import com.example.demo.config.SpringUtils;
 import com.example.demo.model.Message;
 import com.example.demo.model.User;
@@ -16,7 +15,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 @Component
-@ServerEndpoint(value = "/websocket", configurator = HttpConfig.class)  //该注解表示该类被声明为一个webSocket终端
+@ServerEndpoint(value = "/websocket")  //该注解表示该类被声明为一个webSocket终端
 public class MySocket {
     private static final Logger LOGGER=Logger.getLogger(MySocket.class);
     //初始在线人数
@@ -59,10 +58,10 @@ public class MySocket {
                 if(user !=null ){
                     userName = user.getName();
                 }else {
-                    userName = "游客"+ session.getUserProperties().get("ip");
+                    userName = "游客"+ getName(session.getId());
                 }
             }else {
-                userName = "游客"+ session.getUserProperties().get("ip");
+                userName = "游客"+ getName(session.getId());
             }
             Date now = new Date();
             for (Session item:webSocketSet){
@@ -77,6 +76,15 @@ public class MySocket {
             LOGGER.error(e.getMessage());
         }
 
+    }
+
+    private int getName(String id){
+        char c[] = id.toCharArray();
+        int num = 10086;
+        for (char c1 :c){
+            num += c1;
+        }
+        return num;
     }
     static int getOnline_num(){
         return MySocket.online_num;
