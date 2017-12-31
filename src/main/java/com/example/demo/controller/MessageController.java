@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletResponse;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -24,10 +25,14 @@ public class MessageController {
                               @RequestParam(defaultValue = "-1",required = false) int real){
         response.addHeader("Access-Control-Allow-Origin", "*");
         List<Message> messages = messageManager.getMessages();
+        List<Message> result =new ArrayList<>();
+        result.addAll(messages);
         if(real == -1){
-            messages.forEach(message -> message.setMessage(userManage.checkKeyWord(message.getMessage())));
+            result.forEach(message -> message.setMessage(userManage.checkKeyWord(message.getMessage())));
+            return result;
+        }else {
+            return messages; //返回50条消息
         }
-        return messages; //返回50条消息
     }
 
     @RequestMapping(value = "/getOnline")
