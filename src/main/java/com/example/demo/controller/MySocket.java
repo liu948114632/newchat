@@ -29,13 +29,13 @@ public class MySocket {
     public void onOpen(Session session){
         webSocketSet.add(session);
         addOnlineCount();
-        LOGGER.info("有链接加入，当前人数为:"+getOnline_num());
+        LOGGER.debug("有链接加入，当前人数为:"+getOnline_num());
     }
     @OnClose
     public void onClose(Session session){
         webSocketSet.remove(session);
         subOnlineCount();
-        LOGGER.info("有链接关闭,当前人数为:"+getOnline_num());
+        LOGGER.debug("有链接关闭,当前人数为:"+getOnline_num());
     }
 
     @OnMessage
@@ -43,7 +43,7 @@ public class MySocket {
         UserManage userManage = (UserManage) SpringUtils.getBean("userManage") ;
         MessageManager messageManager = (MessageManager) SpringUtils.getBean("messageManager") ;
         //会话
-        LOGGER.info("来自客户端的消息:"+message);
+        LOGGER.debug("来自客户端的消息:"+message);
         try {
             if(message == null || message.trim().length() ==0 ){
                 return;
