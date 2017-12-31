@@ -25,7 +25,7 @@ public class MessageController {
         response.addHeader("Access-Control-Allow-Origin", "*");
         List<Message> messages = messageManager.getMessages();
         if(real == -1){
-            messages.forEach(message -> userManage.checkKeyWord(message.getMessage()));
+            messages.forEach(message -> message.setMessage(userManage.checkKeyWord(message.getMessage())));
         }
         return messages; //返回50条消息
     }
