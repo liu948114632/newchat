@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
@@ -51,6 +53,9 @@ public class MySocket {
                 return;
             }
             String real = s[0];
+            if("".equals(real) || real == null){
+                return;
+            }
             int id = Integer.valueOf(s[1]);
             String userName ;
             if(id !=-1){
@@ -69,7 +74,7 @@ public class MySocket {
             }
             //异步将消息放入内存
             getExecutor().execute(() -> {
-                Message message1 = new Message(userName,real,now);
+                Message message1 = new Message(userName,real, new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(now));
                 messageManager.setMessage(message1);
             });
         }catch (Exception e){

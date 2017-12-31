@@ -1,16 +1,14 @@
 package com.example.demo.model;
 
-import java.util.Date;
-
 public class Message {
     private String name;
     private String message;
-    private Date date;
+    private String date;
 
     public Message() {
     }
 
-    public Message(String name, String message, Date date) {
+    public Message(String name, String message, String date) {
         this.name = name;
         this.message = message;
         this.date = date;
@@ -32,11 +30,11 @@ public class Message {
         this.message = message;
     }
 
-    public Date getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(Date date) {
+    public void setDate(String date) {
         this.date = date;
     }
 }
