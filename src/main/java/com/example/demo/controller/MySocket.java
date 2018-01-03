@@ -69,12 +69,13 @@ public class MySocket {
                 userName = "游客"+ getName(session.getId());
             }
             Date now = new Date();
+            String time = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(now);
             for (Session item:webSocketSet){
-                item.getAsyncRemote().sendText(userName+":" +userManage.checkKeyWord(real));
+                item.getAsyncRemote().sendText(userName+"$" +userManage.checkKeyWord(real)+"$"+time.substring(11,19));
             }
             //异步将消息放入内存
             getExecutor().execute(() -> {
-                Message message1 = new Message(userName,real, new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(now));
+                Message message1 = new Message(userName,real, time);
                 messageManager.setMessage(message1);
             });
         }catch (Exception e){
